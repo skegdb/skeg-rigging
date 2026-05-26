@@ -28,8 +28,8 @@ use std::sync::mpsc;
 use bytes::Bytes;
 
 use crate::{
-    Event, EventFilter, EventStream, Filter, Hit, IterVectors, OpenError, Quota, QuotaError,
-    QueryError, QueryFiltered, ReadOnlyView, RecordId, RecordMeta, TenantEvents, TenantId,
+    Event, EventFilter, EventStream, Filter, Hit, IterVectors, OpenError, QueryError,
+    QueryFiltered, Quota, QuotaError, ReadOnlyView, RecordId, RecordMeta, TenantEvents, TenantId,
     TenantQuota, TenantStats, Usage,
 };
 
@@ -138,11 +138,7 @@ impl MockTenant {
             tags,
             payload,
         };
-        if let Some(slot) = self
-            .records
-            .iter_mut()
-            .find(|r| r.record_id == record_id)
-        {
+        if let Some(slot) = self.records.iter_mut().find(|r| r.record_id == record_id) {
             *slot = rec;
         } else {
             self.records.push(rec);
@@ -174,7 +170,11 @@ impl MockTenant {
 
 impl IterVectors for MockTenant {
     fn iter_vectors(&self) -> Box<dyn Iterator<Item = (RecordId, Vec<f32>)> + '_> {
-        Box::new(self.records.iter().map(|r| (r.record_id, r.embedding.clone())))
+        Box::new(
+            self.records
+                .iter()
+                .map(|r| (r.record_id, r.embedding.clone())),
+        )
     }
 
     fn record_count(&self) -> u64 {
@@ -437,7 +437,11 @@ mod tests {
             .insert(RecordId(3), vec![1.0, 1.0], false, vec![], Bytes::new())
             .unwrap_err();
         match err {
-            QuotaError::Exceeded { dimension, cap, attempted } => {
+            QuotaError::Exceeded {
+                dimension,
+                cap,
+                attempted,
+            } => {
                 assert_eq!(dimension, "records");
                 assert_eq!(cap, 2);
                 assert_eq!(attempted, 3);
@@ -482,7 +486,13 @@ mod tests {
                 Bytes::from_static(b"z"),
             )
             .unwrap_err();
-        assert!(matches!(err, QuotaError::Exceeded { dimension: "bytes", .. }));
+        assert!(matches!(
+            err,
+            QuotaError::Exceeded {
+                dimension: "bytes",
+                ..
+            }
+        ));
     }
 
     #[test]
@@ -528,7 +538,10 @@ mod tests {
             .recv_timeout(Duration::from_millis(100))
             .expect("event should arrive");
         match ev {
-            Event::RecordInserted { record_id, shareable } => {
+            Event::RecordInserted {
+                record_id,
+                shareable,
+            } => {
                 assert_eq!(record_id, RecordId(1));
                 assert!(shareable);
             }

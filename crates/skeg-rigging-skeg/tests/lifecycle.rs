@@ -65,10 +65,22 @@ fn snapshot_then_restore_round_trips_records() {
     let tid = TenantId::from_bytes([3; 16]);
     {
         let t = Tenant::create_new(&src, tid, DIM).unwrap();
-        t.insert(RecordId(1), unit(0), true, vec!["a".into()], b"hello".to_vec())
-            .unwrap();
-        t.insert(RecordId(2), unit(1), false, vec!["b".into()], b"world".to_vec())
-            .unwrap();
+        t.insert(
+            RecordId(1),
+            unit(0),
+            true,
+            vec!["a".into()],
+            b"hello".to_vec(),
+        )
+        .unwrap();
+        t.insert(
+            RecordId(2),
+            unit(1),
+            false,
+            vec!["b".into()],
+            b"world".to_vec(),
+        )
+        .unwrap();
         t.flush().unwrap();
         let boxed: Box<dyn TenantLifecycle> = Box::new(t);
         boxed.snapshot(&snap).expect("snapshot");
@@ -92,7 +104,8 @@ fn destroy_removes_dir() {
     let tdir = workdir.path().join("to-kill");
     let tid = TenantId::from_bytes([4; 16]);
     let t = Tenant::create_new(&tdir, tid, DIM).unwrap();
-    t.insert(RecordId(1), unit(0), true, vec![], vec![]).unwrap();
+    t.insert(RecordId(1), unit(0), true, vec![], vec![])
+        .unwrap();
     t.flush().unwrap();
     assert!(tdir.exists());
 
@@ -110,13 +123,15 @@ fn restore_into_populated_dest_fails() {
     let tid = TenantId::from_bytes([5; 16]);
     {
         let t = Tenant::create_new(&src, tid, DIM).unwrap();
-        t.insert(RecordId(1), unit(0), true, vec![], vec![]).unwrap();
+        t.insert(RecordId(1), unit(0), true, vec![], vec![])
+            .unwrap();
         t.flush().unwrap();
     }
     // Populate dest with its own tenant.
     {
         let t = Tenant::create_new(&dest, TenantId::from_bytes([6; 16]), DIM).unwrap();
-        t.insert(RecordId(99), unit(1), true, vec![], vec![]).unwrap();
+        t.insert(RecordId(99), unit(1), true, vec![], vec![])
+            .unwrap();
         t.flush().unwrap();
     }
     // Restore must refuse.

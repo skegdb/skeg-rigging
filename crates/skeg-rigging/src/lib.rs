@@ -79,7 +79,9 @@ pub use events::{Event, EventFilter, EventKind, EventStream, TenantEvents};
 pub use filter::{Filter, Hit, QueryFiltered, RecordMeta};
 pub use ids::{RecordId, TenantId};
 pub use iter::IterVectors;
-pub use lifecycle::{CAP_VECTOR_KV, CAP_VECTOR_QUANTIZED, CapabilityId, TenantInfo, TenantLifecycle};
+pub use lifecycle::{
+    CAP_VECTOR_KV, CAP_VECTOR_QUANTIZED, CapabilityId, TenantInfo, TenantLifecycle,
+};
 pub use readonly::{ReadOnlyView, open_readonly};
 
 /// Common imports for plugin authors.
@@ -90,7 +92,7 @@ pub use readonly::{ReadOnlyView, open_readonly};
 pub mod prelude {
     pub use crate::{
         CapabilityId, Event, EventFilter, EventKind, EventStream, Filter, Hit, IterVectors,
-        OpenError, Quota, QuotaError, QueryError, QueryFiltered, ReadOnlyView, RecordId,
+        OpenError, QueryError, QueryFiltered, Quota, QuotaError, ReadOnlyView, RecordId,
         RecordMeta, TenantEvents, TenantId, TenantInfo, TenantLifecycle, TenantQuota, TenantStats,
         Usage, open_readonly,
     };

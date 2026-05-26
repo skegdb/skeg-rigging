@@ -18,12 +18,16 @@ fn subscribe_receives_record_inserted_on_adapter() {
     let dir = tempfile::tempdir().unwrap();
     let t = Tenant::create_new(dir.path(), TenantId::ZERO, DIM).unwrap();
     let stream = t.subscribe(EventFilter::ALL);
-    t.insert(RecordId(1), unit(0), true, vec![], b"x".to_vec()).unwrap();
+    t.insert(RecordId(1), unit(0), true, vec![], b"x".to_vec())
+        .unwrap();
     let ev = stream
         .recv_timeout(Duration::from_millis(200))
         .expect("insert event should arrive");
     match ev {
-        Event::RecordInserted { record_id, shareable } => {
+        Event::RecordInserted {
+            record_id,
+            shareable,
+        } => {
             assert_eq!(record_id, RecordId(1));
             assert!(shareable);
         }
@@ -35,7 +39,8 @@ fn subscribe_receives_record_inserted_on_adapter() {
 fn subscribe_receives_record_deleted_on_adapter() {
     let dir = tempfile::tempdir().unwrap();
     let t = Tenant::create_new(dir.path(), TenantId::ZERO, DIM).unwrap();
-    t.insert(RecordId(7), unit(0), false, vec![], b"x".to_vec()).unwrap();
+    t.insert(RecordId(7), unit(0), false, vec![], b"x".to_vec())
+        .unwrap();
     let stream = t.subscribe(EventFilter::ALL);
     assert!(t.delete(RecordId(7)).unwrap());
     let ev = stream
@@ -53,7 +58,8 @@ fn filter_drops_unwanted_kinds() {
         record_deleted: true,
         ..EventFilter::NONE
     });
-    t.insert(RecordId(1), unit(0), false, vec![], b"x".to_vec()).unwrap();
+    t.insert(RecordId(1), unit(0), false, vec![], b"x".to_vec())
+        .unwrap();
     // Insert is filtered out - should time out.
     assert!(stream.recv_timeout(Duration::from_millis(30)).is_err());
     assert!(t.delete(RecordId(1)).unwrap());
@@ -69,7 +75,8 @@ fn multiple_subscribers_each_get_events() {
     let t = Tenant::create_new(dir.path(), TenantId::ZERO, DIM).unwrap();
     let s1 = t.subscribe(EventFilter::ALL);
     let s2 = t.subscribe(EventFilter::ALL);
-    t.insert(RecordId(42), unit(1), true, vec![], b"x".to_vec()).unwrap();
+    t.insert(RecordId(42), unit(1), true, vec![], b"x".to_vec())
+        .unwrap();
     let e1 = s1.recv_timeout(Duration::from_millis(200)).unwrap();
     let e2 = s2.recv_timeout(Duration::from_millis(200)).unwrap();
     assert!(matches!(e1, Event::RecordInserted { record_id, .. } if record_id == RecordId(42)));
@@ -82,11 +89,13 @@ fn dropping_subscription_prunes_sender() {
     let t = Tenant::create_new(dir.path(), TenantId::ZERO, DIM).unwrap();
     {
         let _s = t.subscribe(EventFilter::ALL);
-        t.insert(RecordId(1), unit(0), false, vec![], b"x".to_vec()).unwrap();
+        t.insert(RecordId(1), unit(0), false, vec![], b"x".to_vec())
+            .unwrap();
     }
     // After the stream is dropped, the sender is invalidated; the
     // next emit prunes it. Just need the second insert to not panic.
-    t.insert(RecordId(2), unit(1), false, vec![], b"y".to_vec()).unwrap();
+    t.insert(RecordId(2), unit(1), false, vec![], b"y".to_vec())
+        .unwrap();
 }
 
 #[test]

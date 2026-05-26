@@ -78,10 +78,7 @@ mod tests {
     #[test]
     fn tenant_id_hex_display() {
         let id = TenantId::from_bytes([0xab; 16]);
-        assert_eq!(
-            id.to_string(),
-            "abababababababababababababababab"
-        );
+        assert_eq!(id.to_string(), "abababababababababababababababab");
     }
 
     #[test]

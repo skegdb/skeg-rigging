@@ -78,8 +78,8 @@ fn bench_restore(c: &mut Criterion) {
                     (src, snap, dest_dir)
                 },
                 |(src, snap, dest_dir)| {
-                    let restored = Tenant::restore_from(snap.path(), dest_dir.path())
-                        .expect("restore");
+                    let restored =
+                        Tenant::restore_from(snap.path(), dest_dir.path()).expect("restore");
                     let count = <Tenant as IterVectors>::record_count(&restored);
                     black_box((src, snap, dest_dir, count));
                 },

@@ -1,7 +1,7 @@
 #![deny(unsafe_code)]
 #![warn(missing_docs)]
 
-//! Reference implementation of [`skeg-rigging`] backed by skeg's public
+//! Reference implementation of `skeg-rigging` backed by skeg's public
 //! engine APIs.
 //!
 //! The adapter is **embedded**: it links `skeg-vector::FlatIndex` as a

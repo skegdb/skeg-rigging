@@ -58,8 +58,7 @@ const DIM: u32 = 32;
 fn synth_vector(seed: u64) -> Vec<f32> {
     (0..DIM)
         .map(|d| {
-            let h =
-                ((seed as u32).wrapping_mul(2654435761) ^ d.wrapping_mul(40503)) as f32;
+            let h = ((seed as u32).wrapping_mul(2654435761) ^ d.wrapping_mul(40503)) as f32;
             (h.sin() + 1.0) * 0.5
         })
         .collect()
@@ -218,7 +217,9 @@ fn gate_event_broadcast_16_subscribers_under_threshold() {
     }
     let dir = tempfile::tempdir().unwrap();
     let tenant = Tenant::create_new(dir.path(), TenantId::ZERO, DIM).unwrap();
-    let streams: Vec<_> = (0..16).map(|_| tenant.subscribe(EventFilter::ALL)).collect();
+    let streams: Vec<_> = (0..16)
+        .map(|_| tenant.subscribe(EventFilter::ALL))
+        .collect();
     // Warm-up.
     for i in 0..5u64 {
         tenant
@@ -257,8 +258,5 @@ fn gate_snapshot_is_byte_equal_for_meta_json() {
     let boxed: Box<dyn TenantLifecycle> = Box::new(tenant);
     boxed.snapshot(snap.path()).expect("snapshot");
     let snapshot = std::fs::read(Tenant::meta_path(snap.path())).unwrap();
-    assert_eq!(
-        original, snapshot,
-        "snapshot meta.json differs from source"
-    );
+    assert_eq!(original, snapshot, "snapshot meta.json differs from source");
 }

@@ -136,11 +136,8 @@ impl Tenant {
             }
             (loaded, idx)
         } else {
-            let idx = DiskVamanaIndex::create_empty(
-                &dir,
-                embedding_dim as usize,
-                DEFAULT_L_SEARCH,
-            )?;
+            let idx =
+                DiskVamanaIndex::create_empty(&dir, embedding_dim as usize, DEFAULT_L_SEARCH)?;
             (MetadataSidecar::empty(tenant_id, embedding_dim), idx)
         };
 

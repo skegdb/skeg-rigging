@@ -94,7 +94,10 @@ fn dim_mismatch_on_reopen_errors() {
         Err(e) => assert!(
             matches!(
                 e,
-                skeg_rigging_skeg::TenantError::DimMismatch { on_disk: 4, requested: 8 }
+                skeg_rigging_skeg::TenantError::DimMismatch {
+                    on_disk: 4,
+                    requested: 8
+                }
             ),
             "got {e:?}"
         ),
@@ -107,7 +110,8 @@ fn read_only_rejects_writes() {
     let id = TenantId::from_bytes([4; 16]);
     {
         let t = Tenant::open(dir.path(), id, 2).unwrap();
-        t.insert(RecordId(1), vec![1.0, 0.0], true, vec![], vec![]).unwrap();
+        t.insert(RecordId(1), vec![1.0, 0.0], true, vec![], vec![])
+            .unwrap();
         t.flush().unwrap();
     }
     let ro = Tenant::open_readonly_at(dir.path()).unwrap();
