@@ -1,0 +1,23 @@
+[workspace]
+members = [
+    "crates/skeg-rigging",
+    "crates/skeg-rigging-skeg",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+license = "Apache-2.0"
+repository = "https://github.com/skegdb/skeg-rigging"
+homepage = "https://github.com/skegdb/skeg-rigging"
+authors = ["skeg contributors"]
+
+[workspace.dependencies]
+bytes = "1"
+thiserror = "2"
+skeg-hull = { path = "../skeg-hull/crates/skeg-hull", version = "0.1.0" }
+
+[workspace.lints.clippy]
+uninlined_format_args = "allow"
