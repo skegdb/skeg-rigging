@@ -14,8 +14,7 @@ categories = ["database"]
 
 [dependencies]
 skeg-rigging = { path = "../skeg-rigging", version = "0.1.0" }
-skeg-hull = { workspace = true }
-skeg-vector = "=0.1.0"
+skeg-vector = "0.1"
 bytes = { workspace = true }
 thiserror = { workspace = true }
 serde = { version = "1", features = ["derive"] }
