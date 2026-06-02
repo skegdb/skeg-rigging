@@ -26,6 +26,12 @@ pub enum QueryError {
 /// Errors returned by [`open_readonly`](crate::open_readonly).
 ///
 /// Stability: Stable. `#[non_exhaustive]`.
+///
+/// **Format-agnostic by design.** `rigging` is the public contract crate: it
+/// deliberately does not depend on any concrete on-disk format (e.g.
+/// `skeg-hull`). Adapter crates convert their format-specific errors into
+/// [`OpenError::Format`] at the impl boundary, carrying the underlying error
+/// as a `dyn Error` source.
 #[derive(Debug, thiserror::Error)]
 #[non_exhaustive]
 pub enum OpenError {
@@ -35,9 +41,16 @@ pub enum OpenError {
     /// Permission denied opening one of the vault's files.
     #[error("permission denied")]
     PermissionDenied,
-    /// On-disk format error from skeg-hull.
-    #[error("format error: {0}")]
-    FormatError(#[from] skeg_hull::Error),
+    /// On-disk format error. Adapter-specific cause (if any) is in `source`.
+    #[error("format error: {message}")]
+    Format {
+        /// Human-readable summary supplied by the adapter.
+        message: String,
+        /// Underlying adapter-specific error, if available. Boxed to keep the
+        /// rigging crate free of any concrete format dependency.
+        #[source]
+        source: Option<Box<dyn std::error::Error + Send + Sync>>,
+    },
     /// Generic I/O failure.
     #[error("I/O error: {0}")]
     Io(std::io::Error),

@@ -63,6 +63,8 @@
 //! different concern, the two coexist.
 
 mod accounting;
+#[cfg(feature = "async")]
+pub mod asyncs;
 mod error;
 mod events;
 mod filter;

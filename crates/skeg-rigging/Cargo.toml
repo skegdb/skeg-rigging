@@ -15,13 +15,22 @@ categories = ["database", "api-bindings"]
 [dependencies]
 bytes = { workspace = true }
 thiserror = { workspace = true }
-skeg-hull = { workspace = true }
+async-trait = { workspace = true, optional = true }
+futures-core = { workspace = true, optional = true }
+tokio = { workspace = true, features = ["rt"], optional = true }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
 
 [features]
 default = []
 # In-memory `MockTenant` for plugin authors who want to test against
 # the rigging surface without pulling in a real engine.
 mock = []
+# Async trait variants (F.10): `AsyncIterVectors`, `AsyncQueryFiltered`,
+# `AsyncReadOnlyView` for callers running under Tokio. Sync traits stay
+# the default; this is purely additive.
+async = ["dep:async-trait", "dep:futures-core", "dep:tokio"]
 
 [lints]
 workspace = true

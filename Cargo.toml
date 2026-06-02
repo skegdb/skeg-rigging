@@ -18,6 +18,9 @@ authors = ["skeg contributors"]
 bytes = "1"
 thiserror = "2"
 skeg-hull = { path = "../skeg-hull/crates/skeg-hull", version = "0.1.0" }
+async-trait = "0.1"
+futures-core = { version = "0.3", default-features = false }
+tokio = { version = "1", default-features = false }
 
 [workspace.lints.clippy]
 uninlined_format_args = "allow"
