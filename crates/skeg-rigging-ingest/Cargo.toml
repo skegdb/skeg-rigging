@@ -10,7 +10,7 @@ authors.workspace = true
 description = "Text → embeddings → tenant: a reusable file/dir ingest (and live watch) that writes through any skeg-rigging TenantWrite."
 
 [dependencies]
-skeg-rigging = { path = "../skeg-rigging", version = "0.1.0" }
+skeg-rigging = { path = "../skeg-rigging", version = "0.1.1" }
 anyhow = "1"
 ureq = { version = "2", features = ["json"] }
 serde_json = "1"

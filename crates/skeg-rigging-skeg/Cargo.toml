@@ -13,7 +13,7 @@ keywords = ["skeg", "rigging", "adapter", "vector", "vamana"]
 categories = ["database"]
 
 [dependencies]
-skeg-rigging = { path = "../skeg-rigging", version = "0.1.0" }
+skeg-rigging = { path = "../skeg-rigging", version = "0.1.1" }
 skeg-vector = "0.1"
 bytes = { workspace = true }
 thiserror = { workspace = true }

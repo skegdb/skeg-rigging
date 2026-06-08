@@ -1,0 +1,71 @@
+name: Release
+
+# Tag pattern `v*` triggers a full workspace publish to crates.io in
+# dependency order:
+#
+#   skeg-rigging  →  skeg-rigging-skeg
+#                 →  skeg-rigging-ingest
+#
+# A short sleep between sibling publishes lets the new version
+# propagate on the crates.io index before the next crate is verified
+# (cargo publish --locked walks the dep graph and refuses to upload
+# until every transitive version is resolvable).
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Skip the actual cargo publish (verify only)"
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - name: cargo publish skeg-rigging
+        working-directory: crates/skeg-rigging
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            cargo publish --dry-run --locked
+          else
+            cargo publish --locked
+          fi
+
+      - name: wait for crates.io index propagation
+        if: ${{ inputs.dry_run != true }}
+        run: sleep 45
+
+      - name: cargo publish skeg-rigging-skeg
+        working-directory: crates/skeg-rigging-skeg
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            cargo publish --dry-run --locked
+          else
+            cargo publish --locked
+          fi
+
+      - name: cargo publish skeg-rigging-ingest
+        working-directory: crates/skeg-rigging-ingest
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            cargo publish --dry-run --locked
+          else
+            cargo publish --locked
+          fi
