@@ -1,0 +1,25 @@
+[package]
+name = "skeg-rigging-ingest"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+authors.workspace = true
+description = "Text → embeddings → tenant: a reusable file/dir ingest (and live watch) that writes through any skeg-rigging TenantWrite."
+
+[dependencies]
+skeg-rigging = { path = "../skeg-rigging", version = "0.1.0" }
+anyhow = "1"
+ureq = { version = "2", features = ["json"] }
+serde_json = "1"
+notify = { version = "6", optional = true }
+
+[features]
+default = []
+# `watch` pulls in the filesystem-notify backend for live re-ingest.
+watch = ["dep:notify"]
+
+[lints]
+workspace = true

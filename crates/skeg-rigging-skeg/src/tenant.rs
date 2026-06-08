@@ -30,7 +30,7 @@ use parking_lot::Mutex;
 use skeg_rigging::{
     CAP_VECTOR_KV, CapabilityId, Event, EventFilter, EventStream, Filter, Hit, IterVectors,
     OpenError, QueryError, QueryFiltered, ReadOnlyView, RecordId, RecordMeta, TenantEvents,
-    TenantId, TenantInfo, TenantLifecycle, TenantStats,
+    TenantId, TenantInfo, TenantLifecycle, TenantStats, TenantWrite,
 };
 use skeg_vector::DiskVamanaIndex;
 
@@ -431,6 +431,32 @@ impl TenantLifecycle for Tenant {
         drop(self);
         std::fs::remove_dir_all(&dir).map_err(OpenError::Io)?;
         Ok(())
+    }
+}
+
+impl TenantWrite for Tenant {
+    type Error = TenantError;
+
+    /// Delegates to the inherent [`Tenant::insert`]. The trait takes
+    /// `&mut self` for object-safety across writers that need it; this
+    /// engine uses interior mutability, so a shared borrow suffices.
+    fn insert(
+        &mut self,
+        record_id: RecordId,
+        embedding: &[f32],
+        shareable: bool,
+        tags: Vec<String>,
+        payload: Vec<u8>,
+    ) -> Result<(), TenantError> {
+        Tenant::insert(self, record_id, embedding.to_vec(), shareable, tags, payload)
+    }
+
+    fn flush(&mut self) -> Result<(), TenantError> {
+        Tenant::flush(self)
+    }
+
+    fn embedding_dim(&self) -> u32 {
+        self.embedding_dim
     }
 }
 

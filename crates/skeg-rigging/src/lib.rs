@@ -74,6 +74,7 @@ mod lifecycle;
 #[cfg(feature = "mock")]
 pub mod mock;
 mod readonly;
+mod write;
 
 pub use accounting::{Quota, QuotaError, TenantQuota, TenantStats, Usage};
 pub use error::{OpenError, QueryError};
@@ -85,6 +86,7 @@ pub use lifecycle::{
     CAP_VECTOR_KV, CAP_VECTOR_QUANTIZED, CapabilityId, TenantInfo, TenantLifecycle,
 };
 pub use readonly::{ReadOnlyView, open_readonly};
+pub use write::TenantWrite;
 
 /// Common imports for plugin authors.
 ///
@@ -96,6 +98,6 @@ pub mod prelude {
         CapabilityId, Event, EventFilter, EventKind, EventStream, Filter, Hit, IterVectors,
         OpenError, QueryError, QueryFiltered, Quota, QuotaError, ReadOnlyView, RecordId,
         RecordMeta, TenantEvents, TenantId, TenantInfo, TenantLifecycle, TenantQuota, TenantStats,
-        Usage, open_readonly,
+        TenantWrite, Usage, open_readonly,
     };
 }

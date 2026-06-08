@@ -2,6 +2,7 @@
 members = [
     "crates/skeg-rigging",
     "crates/skeg-rigging-skeg",
+    "crates/skeg-rigging-ingest",
 ]
 resolver = "2"
 
