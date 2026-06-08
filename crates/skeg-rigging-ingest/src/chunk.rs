@@ -81,7 +81,11 @@ fn push_para(out: &mut Vec<Chunk>, lines: &[&str], lo: usize, hi: usize) {
     if text.trim().is_empty() {
         return;
     }
-    out.push(Chunk { text, line_lo: lo, line_hi: hi });
+    out.push(Chunk {
+        text,
+        line_lo: lo,
+        line_hi: hi,
+    });
 }
 
 fn line_windows(text: &str, win: usize, step: usize) -> Vec<Chunk> {
@@ -93,7 +97,11 @@ fn line_windows(text: &str, win: usize, step: usize) -> Vec<Chunk> {
         let slice = &lines[i..end];
         let body = slice.join("\n");
         if !body.trim().is_empty() {
-            out.push(Chunk { text: body, line_lo: i + 1, line_hi: end });
+            out.push(Chunk {
+                text: body,
+                line_lo: i + 1,
+                line_hi: end,
+            });
         }
         if end == lines.len() {
             break;

@@ -74,5 +74,8 @@ fn call(url: &str, model: &str, input: &str) -> Result<Vec<f32>> {
     let arr = body["embeddings"][0]
         .as_array()
         .context("embed response missing embeddings[0]")?;
-    Ok(arr.iter().filter_map(|x| x.as_f64().map(|f| f as f32)).collect())
+    Ok(arr
+        .iter()
+        .filter_map(|x| x.as_f64().map(|f| f as f32))
+        .collect())
 }

@@ -92,13 +92,18 @@ pub fn ingest_tree<W: TenantWrite, E: Embed>(
         );
     }
     let files = collect_files(root, opts)?;
-    let mut stats = IngestStats { next_id: opts.start_id, ..Default::default() };
+    let mut stats = IngestStats {
+        next_id: opts.start_id,
+        ..Default::default()
+    };
     for file in &files {
         ingest_file(writer, embed, root, file, opts, &mut stats)?;
         stats.files += 1;
         progress(&stats);
     }
-    writer.flush().map_err(|e| anyhow::anyhow!("flush writer: {e}"))?;
+    writer
+        .flush()
+        .map_err(|e| anyhow::anyhow!("flush writer: {e}"))?;
     Ok(stats)
 }
 
@@ -111,8 +116,7 @@ fn ingest_file<W: TenantWrite, E: Embed>(
     opts: &IngestOptions,
     stats: &mut IngestStats,
 ) -> Result<()> {
-    let text = std::fs::read_to_string(file)
-        .with_context(|| format!("read {}", file.display()))?;
+    let text = std::fs::read_to_string(file).with_context(|| format!("read {}", file.display()))?;
     let ext = file.extension().and_then(|s| s.to_str()).unwrap_or("");
     let rel = relpath(root, file);
     for c in chunk::chunk(&text, ChunkMode::for_ext(ext)) {
@@ -248,7 +252,10 @@ pub fn watch_tree<W: TenantWrite, E: Embed>(
             }
             last_seen.insert(path.clone(), now);
             opts.start_id = next_id;
-            let mut stats = IngestStats { next_id, ..Default::default() };
+            let mut stats = IngestStats {
+                next_id,
+                ..Default::default()
+            };
             // A file mid-write can fail to read; skip and let the next
             // event pick it up.
             if ingest_file(writer, embed, root, &path, &opts, &mut stats).is_err() {

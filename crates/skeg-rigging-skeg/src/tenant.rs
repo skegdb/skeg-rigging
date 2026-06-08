@@ -448,7 +448,14 @@ impl TenantWrite for Tenant {
         tags: Vec<String>,
         payload: Vec<u8>,
     ) -> Result<(), TenantError> {
-        Tenant::insert(self, record_id, embedding.to_vec(), shareable, tags, payload)
+        Tenant::insert(
+            self,
+            record_id,
+            embedding.to_vec(),
+            shareable,
+            tags,
+            payload,
+        )
     }
 
     fn flush(&mut self) -> Result<(), TenantError> {
