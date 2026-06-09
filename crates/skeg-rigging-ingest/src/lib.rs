@@ -25,7 +25,7 @@ use anyhow::{Context, Result};
 use skeg_rigging::{RecordId, TenantWrite};
 
 pub use chunk::{Chunk, ChunkMode, chunk, word_count};
-pub use embed::{Embed, OllamaEmbed};
+pub use embed::{Embed, OllamaEmbed, StubEmbed};
 
 /// Knobs for an ingest run.
 #[derive(Debug, Clone)]
@@ -77,9 +77,9 @@ pub struct IngestStats {
 ///
 /// `progress` is called once per file with the cumulative stats so far,
 /// so a CLI can render a live line; pass `&mut |_| {}` to ignore it.
-pub fn ingest_tree<W: TenantWrite, E: Embed>(
+pub fn ingest_tree<W: TenantWrite>(
     writer: &mut W,
-    embed: &E,
+    embed: &dyn Embed,
     root: &Path,
     opts: &IngestOptions,
     progress: &mut dyn FnMut(&IngestStats),
@@ -108,9 +108,9 @@ pub fn ingest_tree<W: TenantWrite, E: Embed>(
 }
 
 /// Ingest one file, advancing `stats` (id counter, counts).
-fn ingest_file<W: TenantWrite, E: Embed>(
+fn ingest_file<W: TenantWrite>(
     writer: &mut W,
-    embed: &E,
+    embed: &dyn Embed,
     root: &Path,
     file: &Path,
     opts: &IngestOptions,
@@ -206,9 +206,9 @@ fn walk(dir: &Path, opts: &IngestOptions, out: &mut Vec<PathBuf>) -> Result<()> 
 /// (this v1 does not delete the file's previous chunks — stable
 /// per-chunk ids are a future refinement).
 #[cfg(feature = "watch")]
-pub fn watch_tree<W: TenantWrite, E: Embed>(
+pub fn watch_tree<W: TenantWrite>(
     writer: &mut W,
-    embed: &E,
+    embed: &dyn Embed,
     root: &Path,
     mut opts: IngestOptions,
     mut on_batch: impl FnMut(&IngestStats),

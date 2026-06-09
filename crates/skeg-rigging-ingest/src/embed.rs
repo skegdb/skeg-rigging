@@ -26,6 +26,57 @@ pub trait Embed {
     }
 }
 
+/// A deterministic, dependency-free [`Embed`] for tests and offline use.
+///
+/// It hashes each whitespace word into one of `dim` buckets and
+/// L2-normalises the result — a lexical bag-of-words embedding. It is not
+/// semantic, but it is stable and overlap-sensitive: texts that share
+/// words get similar vectors, which is enough to exercise the ingest /
+/// query path without a model server.
+pub struct StubEmbed {
+    dim: u32,
+}
+
+impl StubEmbed {
+    /// A stub producing `dim`-dimensional vectors.
+    pub fn new(dim: u32) -> Self {
+        StubEmbed { dim: dim.max(1) }
+    }
+}
+
+impl Default for StubEmbed {
+    fn default() -> Self {
+        StubEmbed::new(64)
+    }
+}
+
+impl Embed for StubEmbed {
+    fn dim(&self) -> u32 {
+        self.dim
+    }
+
+    fn passage(&self, text: &str) -> Result<Vec<f32>> {
+        let n = self.dim as usize;
+        let mut v = vec![0.0f32; n];
+        for word in text.split_whitespace() {
+            // FNV-1a over the lowercased word.
+            let mut h: u64 = 0xcbf29ce484222325;
+            for b in word.to_lowercase().bytes() {
+                h ^= b as u64;
+                h = h.wrapping_mul(0x100000001b3);
+            }
+            v[(h as usize) % n] += 1.0;
+        }
+        let norm = v.iter().map(|x| x * x).sum::<f32>().sqrt();
+        if norm > 0.0 {
+            for x in &mut v {
+                *x /= norm;
+            }
+        }
+        Ok(v)
+    }
+}
+
 /// An [`Embed`] backed by an Ollama-compatible HTTP endpoint.
 pub struct OllamaEmbed {
     url: String,
