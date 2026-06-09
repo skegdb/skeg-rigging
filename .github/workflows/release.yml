@@ -3,13 +3,12 @@ name: Release
 # Tag pattern `v*` triggers a full workspace publish to crates.io in
 # dependency order:
 #
-#   skeg-rigging  →  skeg-rigging-skeg
-#                 →  skeg-rigging-ingest
+#   skeg-rigging  ->  skeg-rigging-skeg
+#                 ->  skeg-rigging-ingest
 #
-# A short sleep between sibling publishes lets the new version
-# propagate on the crates.io index before the next crate is verified
-# (cargo publish --locked walks the dep graph and refuses to upload
-# until every transitive version is resolvable).
+# A short sleep between sibling publishes lets the new version reach the
+# crates.io index before the next crate is verified. A re-run against an
+# already-published version is a no-op.
 
 on:
   push:
@@ -41,7 +40,8 @@ jobs:
           if [ "${{ inputs.dry_run }}" = "true" ]; then
             cargo publish --dry-run --locked
           else
-            cargo publish --locked
+            out=$(cargo publish --locked 2>&1) || \
+              echo "$out" | grep -qE 'already (uploaded|exists)' || { echo "$out"; exit 1; }
           fi
 
       - name: wait for crates.io index propagation
@@ -56,7 +56,8 @@ jobs:
           if [ "${{ inputs.dry_run }}" = "true" ]; then
             cargo publish --dry-run --locked
           else
-            cargo publish --locked
+            out=$(cargo publish --locked 2>&1) || \
+              echo "$out" | grep -qE 'already (uploaded|exists)' || { echo "$out"; exit 1; }
           fi
 
       - name: cargo publish skeg-rigging-ingest
@@ -67,5 +68,6 @@ jobs:
           if [ "${{ inputs.dry_run }}" = "true" ]; then
             cargo publish --dry-run --locked
           else
-            cargo publish --locked
+            out=$(cargo publish --locked 2>&1) || \
+              echo "$out" | grep -qE 'already (uploaded|exists)' || { echo "$out"; exit 1; }
           fi
