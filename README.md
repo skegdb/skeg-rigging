@@ -39,8 +39,6 @@ the contract. The convention for capability identifiers in
 - `temporal.windowed` - hypothetical temporal engine
 - `hansa.member` / `hansa.membrane` - plugin-side capabilities
 
-See [private/rigging-2.md][rigging-design] §11 for the full position.
-
 ## Adapter - `skeg-rigging-skeg`
 
 A working impl of the v0.1 trait surface backed by skeg's public
@@ -87,5 +85,3 @@ cargo test --workspace
 ## License
 
 Apache-2.0.
-
-[rigging-design]: ../hansa/private/rigging-2.md
