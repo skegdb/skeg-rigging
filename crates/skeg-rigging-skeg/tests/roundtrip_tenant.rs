@@ -120,3 +120,33 @@ fn read_only_rejects_writes() {
         .unwrap_err();
     assert!(matches!(err, skeg_rigging_skeg::TenantError::Io(_)));
 }
+
+/// The sidecar is only written by `flush`; a tenant that inserted and never
+/// flushed must still reopen with its vectors. It used to take the create
+/// path and write an empty index over the WAL that held them.
+#[test]
+fn reopen_without_flush_keeps_vectors() {
+    let dir = tempfile::tempdir().unwrap();
+    let tid = TenantId::from_bytes([7; 16]);
+    {
+        let t = Tenant::open(dir.path(), tid, 4).unwrap();
+        t.insert(RecordId(1), unit(2, 4), true, vec![], vec![])
+            .unwrap();
+        // no flush
+    }
+    let t = Tenant::open(dir.path(), tid, 4).expect("reopen without flush");
+    assert!(
+        Tenant::meta_path(dir.path()).exists(),
+        "sidecar written on reopen"
+    );
+    drop(t);
+    let idx = skeg_vector::DiskVamanaIndex::open(dir.path()).unwrap();
+    assert_eq!(idx.len(), 1, "vector survived the reopen");
+}
+
+#[test]
+fn create_writes_the_sidecar_at_once() {
+    let dir = tempfile::tempdir().unwrap();
+    let _t = Tenant::open(dir.path(), TenantId::from_bytes([8; 16]), 4).unwrap();
+    assert!(Tenant::meta_path(dir.path()).exists());
+}
