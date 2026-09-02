@@ -74,7 +74,7 @@ fn tmpdir(tag: &str) -> PathBuf {
     dir
 }
 
-fn write(dir: &PathBuf, name: &str, body: &str) {
+fn write(dir: &std::path::Path, name: &str, body: &str) {
     let p = dir.join(name);
     if let Some(parent) = p.parent() {
         std::fs::create_dir_all(parent).unwrap();
