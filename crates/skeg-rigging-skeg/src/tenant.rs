@@ -105,12 +105,25 @@ impl Tenant {
         dir.join("meta.json")
     }
 
+    /// Whether `dir` already holds a `DiskVamanaIndex`. `tier.kind` is the
+    /// first file a create writes and `CURRENT` the last; either present
+    /// means an index (or the remains of one) that must not be created over.
+    fn index_exists(dir: &Path) -> bool {
+        dir.join("tier.kind").exists() || dir.join("CURRENT").exists()
+    }
+
     /// Open or create a tenant at `dir` for read-write access.
     ///
     /// - If `meta.json` exists, reopen both sidecar and `DiskVamanaIndex`.
     ///   The requested `embedding_dim` must match the on-disk value.
-    /// - If `meta.json` is absent, create both: fresh sidecar +
-    ///   empty `DiskVamanaIndex`.
+    /// - If `meta.json` is absent but the directory already holds an
+    ///   index (a tenant that inserted and never flushed - the sidecar is
+    ///   only written by `flush`), reopen the index and start from an
+    ///   empty sidecar: the vectors are in the engine's WAL, the record
+    ///   metadata that was never flushed is gone.
+    /// - Otherwise create both: fresh sidecar + empty `DiskVamanaIndex`,
+    ///   and write the sidecar at once so a later open never takes the
+    ///   create path over live data.
     pub fn open(
         dir: impl AsRef<Path>,
         tenant_id: TenantId,
@@ -135,10 +148,23 @@ impl Tenant {
                 });
             }
             (loaded, idx)
+        } else if Self::index_exists(&dir) {
+            let idx = DiskVamanaIndex::open(&dir)?;
+            if idx.dim() as u32 != embedding_dim {
+                return Err(TenantError::DimMismatch {
+                    on_disk: idx.dim() as u32,
+                    requested: embedding_dim,
+                });
+            }
+            let sidecar = MetadataSidecar::empty(tenant_id, embedding_dim);
+            sidecar.write_to_path(&meta_path)?;
+            (sidecar, idx)
         } else {
             let idx =
                 DiskVamanaIndex::create_empty(&dir, embedding_dim as usize, DEFAULT_L_SEARCH)?;
-            (MetadataSidecar::empty(tenant_id, embedding_dim), idx)
+            let sidecar = MetadataSidecar::empty(tenant_id, embedding_dim);
+            sidecar.write_to_path(&meta_path)?;
+            (sidecar, idx)
         };
 
         Ok(Self {
